@@ -30,26 +30,30 @@ jobs:
 
     # Configure Gradle for optimal use in GitHub Actions, including caching of downloaded dependencies.
     # See: https://github.com/gradle/actions/blob/main/setup-gradle/README.md
-    - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@dbbdc275be76ac10734476cc723d82dfe7ec6eda # v3.4.2
+    #- name: Setup Gradle
+    #  uses: gradle/actions/setup-gradle@dbbdc275be76ac10734476cc723d82dfe7ec6eda # v3.4.2
 
-    - name: Build with Gradle Wrapper
+    #- name: Build with Gradle Wrapper
       # run: ./gradlew build
-      uses: gradle/gradle-build-action@v2
-      with:
-        arguments: build
-        build-root-directory: app
+      #uses: gradle/gradle-build-action@v2
+      #with:
+      #  arguments: build
+      #  build-root-directory: app
 
     # NOTE: The Gradle Wrapper is the default and recommended way to run Gradle (https://docs.gradle.org/current/userguide/gradle_wrapper.html).
     # If your project does not have the Gradle Wrapper configured, you can use the following configuration to run Gradle with a specified version.
     #
-    # - name: Setup Gradle
-    #   uses: gradle/actions/setup-gradle@dbbdc275be76ac10734476cc723d82dfe7ec6eda # v3.4.2
-    #   with:
-    #     gradle-version: '8.5'
-    #
-    # - name: Build with Gradle 8.5
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@dbbdc275be76ac10734476cc723d82dfe7ec6eda # v3.4.2
+      with:
+         gradle-version: '8.5'
+    
+    - name: Build with Gradle 8.5
     #   run: gradle build
+      uses: gradle/gradle-build-action@v2
+      with:
+            arguments: build
+            build-root-directory: app
 
   dependency-submission:
 
