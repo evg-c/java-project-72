@@ -75,3 +75,4 @@ jobs:
       uses: gradle/actions/dependency-submission@dbbdc275be76ac10734476cc723d82dfe7ec6eda # v3.4.2
       with:
          gradle-version: '8.5'
+         build-root-directory: app
