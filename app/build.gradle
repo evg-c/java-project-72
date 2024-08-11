@@ -4,8 +4,13 @@ plugins {
     id 'jacoco'
     id 'com.adarshr.test-logger' version '3.0.0'
     id 'com.github.ben-manes.versions' version '0.39.0'
+    id 'application'
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
+application {
+    mainClass = 'hexlet.code.App'
+}
 group 'hexlet.code'
 version '1.0-SNAPSHOT'
 
@@ -14,8 +19,11 @@ repositories {
 }
 
 dependencies {
+    implementation 'org.projectlombok:lombok:1.18.22'
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+    implementation("io.javalin:javalin:6.1.3")
+    implementation("org.slf4j:slf4j-simple:2.0.7")
 }
 
 test {
