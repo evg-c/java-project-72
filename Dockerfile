@@ -4,13 +4,14 @@ WORKDIR /app
 
 COPY . /app
 
-COPY gradle gradle
-COPY build.gradle .
-COPY settings.gradle .
-RUN gradle build
+COPY ./app/gradle gradle
+COPY ./app/build.gradle .
+COPY ./app/settings.gradle .
 
-COPY src src
-COPY config config
+COPY ./app/src src
+COPY ./app/config config
+
+RUN gradle build
 
 RUN gradle installDist
 
