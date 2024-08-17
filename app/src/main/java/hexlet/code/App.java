@@ -20,7 +20,12 @@ import java.util.stream.Collectors;
 public class App {
     public static Javalin getApp() throws IOException, SQLException {
         var hikariConfig = new HikariConfig();
+        //String jdbcUrlH2 = "jdbc:h2:mem:project;DB_CLOSE_DELAY=-1;";
+        //String jdbcUrlPostgres =
+        //        "jdbc:postgresql://dpg-cqsg6rbqf0us739084g0-a.frankfurt-postgres.render.com:5432/db_project_72?password=A7NoRJzQZ40owUWRAk9FJl37NVy1dBKI&user=db_project_72_user";
+        //String jdbcUrlDeploy = System.getenv().getOrDefault("JDBC_DATABASE_URL", jdbcUrlH2);
         hikariConfig.setJdbcUrl(getJdbcUrl());
+        //hikariConfig.setJdbcUrl(jdbcUrlPostgres);
 
         var dataSource = new HikariDataSource(hikariConfig);
         var sql = readResourceFile("schema.sql");
@@ -55,6 +60,8 @@ public class App {
 
     private static String getJdbcUrl() {
         String jdbcUrlH2 = "jdbc:h2:mem:project;DB_CLOSE_DELAY=-1;";
+        //String jdbcUrlPostgres =
+        //        "jdbc:postgresql://dpg-cqsg6rbqf0us739084g0-a.frankfurt-postgres.render.com:5432/db_project_72?password=A7NoRJzQZ40owUWRAk9FJl37NVy1dBKI&user=db_project_72_user";
         String jdbcUrlDeploy = System.getenv().getOrDefault("JDBC_DATABASE_URL", jdbcUrlH2);
         return jdbcUrlDeploy;
     }
