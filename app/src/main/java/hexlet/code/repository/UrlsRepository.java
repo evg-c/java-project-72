@@ -2,7 +2,6 @@ package hexlet.code.repository;
 
 import hexlet.code.model.Url;
 
-import java.net.URL;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -45,7 +44,7 @@ public class UrlsRepository extends BaseRepository {
         }
     }
 
-    public static Optional<Url> find_by_id(Long id) throws SQLException {
+    public static Optional<Url> findById(Long id) throws SQLException {
         String sql = "SELECT * FROM urls WHERE id = ?";
         try (var conn = dataSource.getConnection();
              var stmt = conn.prepareStatement(sql)) {
@@ -62,16 +61,16 @@ public class UrlsRepository extends BaseRepository {
         }
     }
 
-    public static Optional<Url> find_by_name(String name_url) throws SQLException {
+    public static Optional<Url> findByName(String nameUrl) throws SQLException {
         String sql = "SELECT * FROM urls WHERE name = ?";
         try (var conn = dataSource.getConnection();
              var stmt = conn.prepareStatement(sql)) {
-            stmt.setString(1, name_url);
+            stmt.setString(1, nameUrl);
             var resultSet = stmt.executeQuery();
             if (resultSet.next()) {
                 var id = resultSet.getLong("id");
                 var createdAt = resultSet.getTimestamp("created_at");
-                var url = new Url(name_url, createdAt);
+                var url = new Url(nameUrl, createdAt);
                 url.setId(id);
                 return Optional.of(url);
             }

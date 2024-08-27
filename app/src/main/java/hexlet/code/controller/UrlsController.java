@@ -17,12 +17,11 @@ import java.net.URL;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 import static io.javalin.rendering.template.TemplateUtil.model;
 
 public class UrlsController {
-    public static String to_be_added_url;
+    public static String toBeAddedUrl;
     public static String flashMessage = "";
     public static StringBuilder stringException = new StringBuilder();
     public static void build(Context ctx) {
@@ -37,7 +36,7 @@ public class UrlsController {
                     .check(value -> isUrl(value), flashMessage)
                     .check(value -> urlNotFoundInDB(value), flashMessage)
                     .get();
-            var url = new Url(to_be_added_url, createdAt);
+            var url = new Url(toBeAddedUrl, createdAt);
             UrlsRepository.save(url);
             ctx.sessionAttribute("flash", "Страница успешно добавлена");
             ctx.redirect(NamedRoutes.urlsPath());
@@ -60,7 +59,7 @@ public class UrlsController {
 
     public static void show(Context ctx) throws SQLException {
         var id = ctx.pathParamAsClass("id", Long.class).get();
-        var url = UrlsRepository.find_by_id(id)
+        var url = UrlsRepository.findById(id)
                 .orElseThrow(() -> new NotFoundResponse("URL with id = " + id + " not found"));
         var page = new UrlPage(url);
         ctx.render("url_show.jte", model("page", page));
@@ -69,9 +68,9 @@ public class UrlsController {
     public static boolean isUrl(String nameUrl) {
         try {
             URI uri = new URI(nameUrl);
-            URL entered_url = uri.toURL();
-            String port = (entered_url.getPort() > 1) ? ":" + String.valueOf(entered_url.getPort()) : "";
-            to_be_added_url = entered_url.getProtocol() + "://" + entered_url.getHost() + port;
+            URL enteredUrl = uri.toURL();
+            String port = (enteredUrl.getPort() > 1) ? ":" + String.valueOf(enteredUrl.getPort()) : "";
+            toBeAddedUrl = enteredUrl.getProtocol() + "://" + enteredUrl.getHost() + port;
         } catch (URISyntaxException | MalformedURLException e) {
             stringException.append(e);
             flashMessage = "Некорректный URL";
@@ -82,7 +81,7 @@ public class UrlsController {
 
     public static boolean urlNotFoundInDB(String nameUrl) {
         try {
-            if (UrlsRepository.find_by_name(to_be_added_url).orElse(null) == null) {
+            if (UrlsRepository.findByName(toBeAddedUrl).orElse(null) == null) {
                 return true;
             }
         } catch (SQLException e) {
