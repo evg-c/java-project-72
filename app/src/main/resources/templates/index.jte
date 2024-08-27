@@ -1,3 +1,23 @@
+@import hexlet.code.NamedRoutes
+@import hexlet.code.dto.BuildUrlPage
+@param BuildUrlPage page
+
+@if(page != null && page.getFlash() != null)
+    <div class="alert alert-danger" role="alert">
+        <p>${page.getFlash()}</p>
+    </div>
+@endif
+
+@if(page.getErrors() != null)
+    <ul>
+        @for(var validator: page.getErrors().values())
+            @for(var error: validator)
+                <li>${error.getMessage()}</li>
+            @endfor
+        @endfor
+    </ul>
+@endif
+
 <!DOCTYPE html>
 <html lang="ru">
     <head>
@@ -7,11 +27,20 @@
               rel="stylesheet"
               integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We"
               crossorigin="anonymous">
-        <title>Javalin project</title>
+        <title>Анализатор страниц</title>
     </head>
     <body>
         <main>
-            <h1>Hello World</h1>
+            <h1>Анализатор страниц</h1>
+            <form action="${NamedRoutes.urlsPath()}" method="post">
+                <div>
+                    <label>
+                        URL сайта
+                        <input type="url" name="url" />
+                    </label>
+                </div>
+                <input type="submit" value="Проверить" />
+            </form>
         </main>
     </body>
 </html>
