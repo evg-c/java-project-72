@@ -8,8 +8,12 @@
         @if(page.getUrls().isEmpty())
             <p>Пока не добавлено ни одной страницы</p>
         @else
+            <tr>
+                <th>ID</th>
+                <th>URL</th>
+            </tr>
             @for(var url: page.getUrls())
-                <div>
+                <table>
                     <tr>
                         <td>
                             ${url.getId()}
@@ -18,7 +22,7 @@
                             <a href="urls/${url.getId()}">${url.getName()}</a>
                         </td>
                     </tr>
-                </div>
+                </table>
             @endfor
         @endif
     `,

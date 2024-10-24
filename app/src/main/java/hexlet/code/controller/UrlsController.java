@@ -5,10 +5,19 @@ import hexlet.code.dto.BuildUrlPage;
 import hexlet.code.dto.UrlPage;
 import hexlet.code.dto.UrlsPage;
 import hexlet.code.model.Url;
+import hexlet.code.model.UrlCheck;
+import hexlet.code.repository.ChecksRepository;
 import hexlet.code.repository.UrlsRepository;
 import io.javalin.http.Context;
 import io.javalin.http.NotFoundResponse;
 import io.javalin.validation.ValidationException;
+import kong.unirest.core.HttpResponse;
+import kong.unirest.core.Unirest;
+import kong.unirest.core.UnirestException;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import java.net.MalformedURLException;
 import java.net.URI;
@@ -18,6 +27,8 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
+import static hexlet.code.repository.ChecksRepository.lastDateOfCheck;
+import static hexlet.code.repository.ChecksRepository.lastStatusCode;
 import static io.javalin.rendering.template.TemplateUtil.model;
 
 public class UrlsController {
@@ -39,12 +50,15 @@ public class UrlsController {
             var url = new Url(toBeAddedUrl, createdAt);
             UrlsRepository.save(url);
             ctx.sessionAttribute("flash", "Страница успешно добавлена");
+            ctx.sessionAttribute("flash-type", "success");
             ctx.redirect(NamedRoutes.urlsPath());
         } catch (ValidationException e) {
             ctx.sessionAttribute("flash", flashMessage);
+            ctx.sessionAttribute("flash-type", "danger");
             var name = ctx.formParam("url");
-            var page = new BuildUrlPage(name, e.getErrors());
-            stringException.append(e);
+            //var page = new BuildUrlPage(name, e.getErrors());
+            var page = new BuildUrlPage();
+            //stringException.append(e.getMessage());
             page.setFlash(ctx.consumeSessionAttribute("flash"));
             ctx.render("index.jte", model("page", page));
         }
@@ -61,8 +75,63 @@ public class UrlsController {
         var id = ctx.pathParamAsClass("id", Long.class).get();
         var url = UrlsRepository.findById(id)
                 .orElseThrow(() -> new NotFoundResponse("URL with id = " + id + " not found"));
-        var page = new UrlPage(url);
+        // ищем дату последней проверки и код-статус ответа
+        String lastDateOfCheck = (lastDateOfCheck(id) == null ? ""
+                : String.valueOf(lastDateOfCheck(id).toLocalDateTime().withSecond(0).withNano(0)))
+                    .replaceFirst("T", " ");
+        String lastStatusCode = (lastStatusCode(id) == 0 ? "" : String.valueOf(lastStatusCode(id)));
+        var page = new UrlPage(url, lastDateOfCheck, lastStatusCode);
         ctx.render("url_show.jte", model("page", page));
+    }
+
+    public static void check(Context ctx) throws SQLException {
+        var id = ctx.pathParamAsClass("id", Long.class).get();
+        var url = UrlsRepository.findById(id)
+                .orElseThrow(() -> new NotFoundResponse("URL with id = " + id + " not found"));
+        try {
+            // здесь проверка конкретного url
+            HttpResponse<String> response = Unirest.get(url.getName()).asString();
+            // заполение полей urlCheck полученными результатами
+            var statusCode = response.getStatus();
+            var body = response.getBody();
+            var urlId = id;
+            var createdAt = Timestamp.valueOf(LocalDateTime.now());
+            Document doc = Jsoup.parse(body);
+            String title = doc.title() == null ? "" : doc.title();
+            Element tagH1 = doc.selectFirst("h1");
+            String h1 = tagH1 == null ? "" : tagH1.text();
+            Elements nameDescription = doc.select("meta[name=description]");
+            String description = nameDescription == null ? "" : nameDescription.attr("content");
+            //String description = doc.select("meta[name=description]").attr("content");
+            //String title = "";
+            //if (body.contains("<title>")) {
+            //    title = body.substring(body.indexOf("<title>") + 7, body.indexOf("</title>"));
+            //}
+            //String h1 = "";
+            //if (body.contains("<h1>")) {
+            //    h1 = body.substring(body.indexOf("<h1>") + 4, body.indexOf("</h1>"));
+            //}
+            //String description = "";
+            //if (body.contains("Description")) {
+            //    String descriptionToEnd = body.substring(body.indexOf("Description") + 22);
+            //    description = descriptionToEnd.substring(0, descriptionToEnd.indexOf("\" />"));
+            //}
+            StringBuilder desc = new StringBuilder(description);
+            var check = new UrlCheck(statusCode, title, h1, desc, urlId, createdAt);
+            // сохраняем в репозиторий
+            ChecksRepository.save(check);
+            ctx.sessionAttribute("flash", "Страница успешно проверена");
+            ctx.sessionAttribute("flash-type", "success");
+        } catch (UnirestException e) {
+            ctx.sessionAttribute("flash", "Некорректный адрес");
+            ctx.sessionAttribute("flash-type", "danger");
+        } catch (Exception ex) {
+            ctx.sessionAttribute("flash", ex.getMessage());
+            ctx.sessionAttribute("flash-type", "danger");
+        } finally {
+            Unirest.shutDown();
+        }
+        ctx.redirect(NamedRoutes.urlCheck(id));
     }
 
     public static boolean isUrl(String nameUrl) {
@@ -71,8 +140,8 @@ public class UrlsController {
             URL enteredUrl = uri.toURL();
             String port = (enteredUrl.getPort() > 1) ? ":" + String.valueOf(enteredUrl.getPort()) : "";
             toBeAddedUrl = enteredUrl.getProtocol() + "://" + enteredUrl.getHost() + port;
-        } catch (URISyntaxException | MalformedURLException e) {
-            stringException.append(e);
+        } catch (IllegalArgumentException | MalformedURLException | URISyntaxException e) {
+            stringException.append(e.getMessage());
             flashMessage = "Некорректный URL";
             return false;
         }
@@ -81,11 +150,15 @@ public class UrlsController {
 
     public static boolean urlNotFoundInDB(String nameUrl) {
         try {
+            URI uri = new URI(nameUrl);
+            URL enteredUrl = uri.toURL();
+            String port = (enteredUrl.getPort() > 1) ? ":" + String.valueOf(enteredUrl.getPort()) : "";
+            toBeAddedUrl = enteredUrl.getProtocol() + "://" + enteredUrl.getHost() + port;
             if (UrlsRepository.findByName(toBeAddedUrl).orElse(null) == null) {
                 return true;
             }
-        } catch (SQLException e) {
-            stringException.append(e);
+        } catch (Exception e) {
+            stringException.append(e.getMessage());
             return false;
         }
         flashMessage = "Страница уже существует";

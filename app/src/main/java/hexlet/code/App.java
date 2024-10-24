@@ -5,6 +5,7 @@ import com.zaxxer.hikari.HikariDataSource;
 import gg.jte.ContentType;
 import gg.jte.TemplateEngine;
 import gg.jte.resolve.ResourceCodeResolver;
+import hexlet.code.controller.ChecksController;
 import hexlet.code.controller.UrlsController;
 import hexlet.code.repository.BaseRepository;
 import io.javalin.Javalin;
@@ -39,15 +40,12 @@ public class App {
             config.fileRenderer(new JavalinJte(createTemplateEngine()));
         });
 
-        //app.get("/", ctx -> {
-        //    //ctx.result("Hello World");
-        //    ctx.render("index.jte");
-        //});
-
         app.get(NamedRoutes.rootPath(), UrlsController::build);
         app.post(NamedRoutes.urlsPath(), UrlsController::create);
         app.get(NamedRoutes.urlsPath(), UrlsController::index);
         app.get(NamedRoutes.urlPathId(), UrlsController::show);
+        app.post(NamedRoutes.urlsIdChecks(), UrlsController::check);
+        app.get(NamedRoutes.urlsIdChecks(), ChecksController::show);
 
         return app;
     }
@@ -59,12 +57,14 @@ public class App {
 
     private static int getPort() {
         String port = System.getenv().getOrDefault("PORT", "7070");
+        log.info(port);
         return Integer.valueOf(port);
     }
 
     private static String getJdbcUrl() {
         String jdbcUrlH2 = "jdbc:h2:mem:project;DB_CLOSE_DELAY=-1;";
         String jdbcUrlDeploy = System.getenv().getOrDefault("JDBC_DATABASE_URL", jdbcUrlH2);
+        log.info(jdbcUrlDeploy);
         return jdbcUrlDeploy;
     }
 

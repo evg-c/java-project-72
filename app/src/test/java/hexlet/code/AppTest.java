@@ -1,9 +1,12 @@
 package hexlet.code;
 
 import hexlet.code.model.Url;
+import hexlet.code.model.UrlCheck;
+import hexlet.code.repository.ChecksRepository;
 import hexlet.code.repository.UrlsRepository;
 import io.javalin.Javalin;
 import io.javalin.testtools.JavalinTest;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -64,6 +67,32 @@ public class AppTest {
         JavalinTest.test(app, ((server, client) -> {
             var response = client.get("/urls/999999");
             assertThat(response.code()).isEqualTo(404);
+        }));
+    }
+
+    @Test
+    public void testCreateCheck() throws SQLException {
+        var url = new Url("http://google.com", Timestamp.valueOf(LocalDateTime.now()));
+        UrlsRepository.save(url);
+        var check = new UrlCheck(200, "", "", new StringBuilder(""), url.getId(),
+                Timestamp.valueOf(LocalDateTime.now()));
+        ChecksRepository.save(check);
+        JavalinTest.test(app, ((server, client) -> {
+            var response = client.post("/urls/" + url.getId() + "/checks");
+            assertThat(response.code()).isEqualTo(200);
+        }));
+    }
+
+    @Test
+    public void testCheckPage() throws SQLException {
+        var url = new Url("http://google.com", Timestamp.valueOf(LocalDateTime.now()));
+        UrlsRepository.save(url);
+        var check = new UrlCheck(200, "", "", new StringBuilder(""), url.getId(),
+                Timestamp.valueOf(LocalDateTime.now()));
+        ChecksRepository.save(check);
+        JavalinTest.test(app, ((server, client) -> {
+            var response = client.get("/urls/" + url.getId() + "/checks");
+            assertThat(response.code()).isEqualTo(200);
         }));
     }
 }
