@@ -12,7 +12,6 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.sql.SQLOutput;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
