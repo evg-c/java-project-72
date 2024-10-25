@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.sql.SQLOutput;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
@@ -36,11 +37,23 @@ public class AppTest {
 
     @Test
     public void testUrlsPage() {
-        JavalinTest.test(app, ((server, client) -> {
+        JavalinTest.test(app, (server, client) -> {
             var response = client.get("/urls");
             assertThat(response.code()).isEqualTo(200);
-        }));
+            System.out.println(response.body().string());
+        });
     }
+
+//    @Test
+//    void testIndex() {
+//        JavalinTest.test(app, (server, client) -> {
+//            var response = client.get("/urls");
+//            assertThat(response.code()).isEqualTo(200);
+//            assertThat(response.body().string())
+//                    .contains(existingUrl.get("name").toString())
+//                    .contains(existingUrlCheck.get("status_code").toString());
+//        });
+//    }
 
     @Test
     public void testCreateUrl() {
