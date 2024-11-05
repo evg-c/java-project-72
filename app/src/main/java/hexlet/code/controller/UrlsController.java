@@ -65,7 +65,7 @@ public class UrlsController {
     }
 
     public static void index(Context ctx) throws SQLException {
-        var urls = UrlsRepository.getEntities();
+        var urls = UrlsRepository.getEntitiesFull();
         var page = new UrlsPage(urls);
         page.setFlash(ctx.consumeSessionAttribute("flash"));
         ctx.render("urls_index.jte", model("page", page));
@@ -76,11 +76,7 @@ public class UrlsController {
         var url = UrlsRepository.findById(id)
                 .orElseThrow(() -> new NotFoundResponse("URL with id = " + id + " not found"));
         // ищем дату последней проверки и код-статус ответа
-        String lastDateOfCheck = (lastDateOfCheck(id) == null ? ""
-                : String.valueOf(lastDateOfCheck(id).toLocalDateTime().withSecond(0).withNano(0)))
-                    .replaceFirst("T", " ");
-        String lastStatusCode = (lastStatusCode(id) == 0 ? "" : String.valueOf(lastStatusCode(id)));
-        var page = new UrlPage(url, lastDateOfCheck, lastStatusCode);
+        var page = new UrlPage(url, timeStampToString(lastDateOfCheck(id)), statusCodeToString(lastStatusCode(id)));
         ctx.render("url_show.jte", model("page", page));
     }
 
@@ -163,5 +159,17 @@ public class UrlsController {
         }
         flashMessage = "Страница уже существует";
         return false;
+    }
+
+    public static String timeStampToString(Timestamp stamp) {
+        String dateTime = (stamp == null ? ""
+                : String.valueOf(stamp.toLocalDateTime().withSecond(0).withNano(0)))
+                .replaceFirst("T", " ");
+        return dateTime;
+    }
+
+    public static String statusCodeToString(int statusCode) {
+        String lastStatusCode = (statusCode == 0 ? "" : String.valueOf(statusCode));
+        return lastStatusCode;
     }
 }

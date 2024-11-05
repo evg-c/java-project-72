@@ -1,12 +1,16 @@
 package hexlet.code.repository;
 
 import hexlet.code.model.Url;
+import hexlet.code.model.Urls;
 
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import static hexlet.code.controller.UrlsController.statusCodeToString;
+import static hexlet.code.controller.UrlsController.timeStampToString;
 
 public class UrlsRepository extends BaseRepository {
     public static void save(Url url) throws SQLException {
@@ -39,6 +43,34 @@ public class UrlsRepository extends BaseRepository {
                 var url = new Url(name, createdAt);
                 url.setId(id);
                 result.add(url);
+            }
+            return result;
+        }
+    }
+
+    public static List<Urls> getEntitiesFull() throws SQLException {
+        String sql =
+            "SELECT t1.id, t1.name, t2.max_date, t3.status_code " +
+            "FROM urls t1 " +
+            "LEFT JOIN ( " +
+            "  SELECT url_id, MAX(created_at) AS max_date " +
+            "  FROM url_checks GROUP BY url_id) t2 " +
+            "  ON t1.id = t2.url_id " +
+            "LEFT JOIN url_checks t3 " +
+            "  ON t1.id = t3.url_id AND t2.max_date = t3.created_at ";
+        try (var conn = dataSource.getConnection();
+             var stmt = conn.prepareStatement(sql)) {
+            var resultSet = stmt.executeQuery();
+            var result = new ArrayList<Urls>();
+            while (resultSet.next()) {
+                var id = resultSet.getLong("id");
+                var name = resultSet.getString("name");
+                var maxDate = resultSet.getTimestamp("max_date");
+                var status_code = resultSet.getInt("status_code");
+                var url = new Url(name, maxDate);
+                url.setId(id);
+                var urls = new Urls(url, timeStampToString(maxDate), statusCodeToString(status_code));
+                result.add(urls);
             }
             return result;
         }

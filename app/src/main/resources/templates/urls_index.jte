@@ -1,30 +1,25 @@
+@import gg.jte.Content
 @import hexlet.code.dto.UrlsPage
 
 @param UrlsPage page
 
 @template.layout.page(
-    page = page,
-    content = @`
-        @if(page.getUrls().isEmpty())
-            <p>Пока не добавлено ни одной страницы</p>
-        @else
+page = page,
+content = @`
+    <tr>
+        <th>ID</th>
+        <th>URL</th>
+    </tr>
+    @for(var urls: page.getUrls())
+        <table>
             <tr>
-                <th>ID</th>
-                <th>URL</th>
+                <td>${urls.getUrl().getId()}</td>
+                <td><a href="urls/${urls.getUrl().getId()}">${urls.getUrl().getName()}</a></td>
+                <td>${urls.getLastDate()}</td>
+                <td>${urls.getStatus_code()}</td>
             </tr>
-            @for(var url: page.getUrls())
-                <table>
-                    <tr>
-                        <td>
-                            ${url.getId()}
-                        </td>
-                        <td>
-                            <a href="urls/${url.getId()}">${url.getName()}</a>
-                        </td>
-                    </tr>
-                </table>
-            @endfor
-        @endif
+        </table>
+    @endfor
     `,
     footer = @`
         <p>Thank for visiting</p>
