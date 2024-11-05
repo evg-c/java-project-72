@@ -16,7 +16,7 @@ content = @`
                 <td>${urls.getUrl().getId()}</td>
                 <td><a href="urls/${urls.getUrl().getId()}">${urls.getUrl().getName()}</a></td>
                 <td>${urls.getLastDate()}</td>
-                <td>${urls.getStatus_code()}</td>
+                <td>${urls.getStatusCode()}</td>
             </tr>
         </table>
     @endfor
