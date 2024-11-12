@@ -91,7 +91,6 @@ public class UrlsController {
             var statusCode = response.getStatus();
             var body = response.getBody();
             var urlId = id;
-            var createdAt = Timestamp.valueOf(LocalDateTime.now());
             Document doc = Jsoup.parse(body);
             String title = doc.title() == null ? "" : doc.title();
             Element tagH1 = doc.selectFirst("h1");
@@ -113,7 +112,7 @@ public class UrlsController {
             //    description = descriptionToEnd.substring(0, descriptionToEnd.indexOf("\" />"));
             //}
             StringBuilder desc = new StringBuilder(description);
-            var check = new UrlCheck(statusCode, title, h1, desc, urlId, createdAt);
+            var check = new UrlCheck(statusCode, title, h1, desc, urlId, null);
             // сохраняем в репозиторий
             ChecksRepository.save(check);
             ctx.sessionAttribute("flash", "Страница успешно проверена");
