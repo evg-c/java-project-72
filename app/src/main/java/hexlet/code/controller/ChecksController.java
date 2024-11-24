@@ -20,6 +20,6 @@ public class ChecksController {
         var checks = ChecksRepository.getEntities(id);
         var page = new UrlCheckPage(id, urlName, createdUrl, checks);
         page.setFlash(ctx.consumeSessionAttribute("flash"));
-        ctx.render("checks_index.jte", model("page", page));
+        ctx.render("urls/checks_index.jte", model("page", page));
     }
 }

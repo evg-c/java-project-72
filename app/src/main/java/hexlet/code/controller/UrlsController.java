@@ -2,7 +2,6 @@ package hexlet.code.controller;
 
 import hexlet.code.NamedRoutes;
 import hexlet.code.dto.BuildUrlPage;
-import hexlet.code.dto.UrlPage;
 import hexlet.code.dto.UrlsPage;
 import hexlet.code.model.Url;
 import hexlet.code.model.UrlCheck;
@@ -27,8 +26,6 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 
-import static hexlet.code.repository.ChecksRepository.lastDateOfCheck;
-import static hexlet.code.repository.ChecksRepository.lastStatusCode;
 import static io.javalin.rendering.template.TemplateUtil.model;
 
 public class UrlsController {
@@ -68,16 +65,7 @@ public class UrlsController {
         var urls = UrlsRepository.getEntitiesFull();
         var page = new UrlsPage(urls);
         page.setFlash(ctx.consumeSessionAttribute("flash"));
-        ctx.render("urls_index.jte", model("page", page));
-    }
-
-    public static void show(Context ctx) throws SQLException {
-        var id = ctx.pathParamAsClass("id", Long.class).get();
-        var url = UrlsRepository.findById(id)
-                .orElseThrow(() -> new NotFoundResponse("URL with id = " + id + " not found"));
-        // ищем дату последней проверки и код-статус ответа
-        var page = new UrlPage(url, timeStampToString(lastDateOfCheck(id)), statusCodeToString(lastStatusCode(id)));
-        ctx.render("url_show.jte", model("page", page));
+        ctx.render("urls/urls_index.jte", model("page", page));
     }
 
     public static void check(Context ctx) throws SQLException {

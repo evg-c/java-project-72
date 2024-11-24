@@ -19,7 +19,18 @@
                 crossorigin="anonymous"></script>
         <title>Анализатор страниц</title>
     </head>
-    <body>
+    <body class="d-flex flex-column min-vh-100">
+        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="/">Анализатор страниц</a>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <div class="navbar-nav">
+                        <a class="nav-link" href="/">Главная</a>
+                        <a class="nav-link" href="/urls">Сайты</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
         @if(page != null && page.getFlash() != null)
             <div class="alert alert-success" role="alert">
                 <p>${page.getFlash()}</p>
